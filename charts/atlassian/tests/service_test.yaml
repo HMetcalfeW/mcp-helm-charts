@@ -1,0 +1,74 @@
+suite: service
+templates:
+  - service.yaml
+release:
+  name: test-release
+  namespace: test-ns
+tests:
+  - it: should render a Service
+    asserts:
+      - isKind:
+          of: Service
+
+  - it: should set the correct name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-atlassian
+
+  - it: should include standard labels
+    asserts:
+      - isNotEmpty:
+          path: metadata.labels["helm.sh/chart"]
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: atlassian
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: test-release
+
+  - it: should default to ClusterIP
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+
+  - it: should use custom service type
+    set:
+      service.type: NodePort
+    asserts:
+      - equal:
+          path: spec.type
+          value: NodePort
+
+  - it: should set default port
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+      - equal:
+          path: spec.ports[0].targetPort
+          value: http
+      - equal:
+          path: spec.ports[0].protocol
+          value: TCP
+      - equal:
+          path: spec.ports[0].name
+          value: http
+
+  - it: should use custom service port
+    set:
+      service.port: 9090
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 9090
+
+  - it: should have correct selector labels
+    asserts:
+      - equal:
+          path: spec.selector["app.kubernetes.io/name"]
+          value: atlassian
+      - equal:
+          path: spec.selector["app.kubernetes.io/instance"]
+          value: test-release

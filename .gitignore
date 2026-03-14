@@ -1,0 +1,15 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Helm
+*.tgz
+
+# Claude Code
+.claude/settings.local.json

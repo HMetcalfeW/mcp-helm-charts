@@ -1,0 +1,337 @@
+suite: deployment
+templates:
+  - deployment.yaml
+release:
+  name: test-release
+  namespace: test-ns
+tests:
+  # ── Basic rendering ──────────────────────────────────────────────────────────
+  - it: should render a Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+
+  - it: should set the correct name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-atlassian
+
+  - it: should include standard labels
+    asserts:
+      - isNotEmpty:
+          path: metadata.labels["helm.sh/chart"]
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: atlassian
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: test-release
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  # ── Replicas ─────────────────────────────────────────────────────────────────
+  - it: should default to 1 replica
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: should respect custom replica count
+    set:
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  # ── Image ────────────────────────────────────────────────────────────────────
+  - it: should use the default image
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "mcp/atlassian:latest"
+
+  - it: should use custom image tag
+    set:
+      image.tag: "v0.21.0"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "mcp/atlassian:v0.21.0"
+
+  - it: should set image pull policy
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: should set image pull secrets when configured
+    set:
+      imagePullSecrets:
+        - name: my-registry-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: my-registry-secret
+
+  # ── Container args ──────────────────────────────────────────────────────────
+  - it: should set default transport and port args
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--transport"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "sse"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--port"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "8080"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--host"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "0.0.0.0"
+
+  - it: should include --read-only when readOnly is true
+    set:
+      server.readOnly: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--read-only"
+
+  - it: should omit --read-only when readOnly is false
+    set:
+      server.readOnly: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: "--read-only"
+
+  - it: should append extraArgs
+    set:
+      server.extraArgs:
+        - "--enabled-tools"
+        - "jira_search"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--enabled-tools"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "jira_search"
+
+  - it: should use custom transport
+    set:
+      server.transport: streamable-http
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "streamable-http"
+
+  # ── Container port ──────────────────────────────────────────────────────────
+  - it: should set container port matching server.port
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 8080
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].name
+          value: http
+
+  - it: should use custom server port
+    set:
+      server.port: 9090
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9090
+
+  # ── envFrom ─────────────────────────────────────────────────────────────────
+  - it: should reference the default configmap and secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[0].configMapRef.name
+          value: test-release-atlassian-config
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[1].secretRef.name
+          value: test-release-atlassian-secrets
+
+  - it: should reference existingSecret when set
+    set:
+      secrets.existingSecret: my-external-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom[1].secretRef.name
+          value: my-external-secret
+
+  # ── Probes ──────────────────────────────────────────────────────────────────
+  - it: should configure startup probe
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.tcpSocket.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.failureThreshold
+          value: 30
+
+  - it: should configure liveness probe
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.tcpSocket.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.periodSeconds
+          value: 15
+
+  - it: should configure readiness probe
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.tcpSocket.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 10
+
+  # ── Security context ────────────────────────────────────────────────────────
+  - it: should set pod security context
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 1001
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 1001
+
+  - it: should set container security context
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - contains:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          content: ALL
+
+  # ── Volumes / volume mounts ─────────────────────────────────────────────────
+  - it: should mount tmp and cache as emptyDir
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: tmp
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: cache
+            emptyDir: {}
+
+  - it: should mount tmp at /tmp
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: tmp
+            mountPath: /tmp
+
+  - it: should mount cache at /home/app/.cache
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: cache
+            mountPath: /home/app/.cache
+
+  # ── Resources ───────────────────────────────────────────────────────────────
+  - it: should set default resources
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 100m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 128Mi
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 500m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 512Mi
+
+  # ── Annotations ─────────────────────────────────────────────────────────────
+  - it: should include config checksum annotation
+    asserts:
+      - isNotEmpty:
+          path: spec.template.metadata.annotations["checksum/config"]
+
+  - it: should include secret checksum annotation when not using existingSecret
+    asserts:
+      - isNotEmpty:
+          path: spec.template.metadata.annotations["checksum/secret"]
+
+  - it: should omit secret checksum annotation when using existingSecret
+    set:
+      secrets.existingSecret: my-external-secret
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations["checksum/secret"]
+
+  - it: should include custom pod annotations
+    set:
+      podAnnotations:
+        prometheus.io/scrape: "true"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+
+  # ── Service account ─────────────────────────────────────────────────────────
+  - it: should use generated service account name by default
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-atlassian
+
+  - it: should use custom service account name
+    set:
+      serviceAccount.create: false
+      serviceAccount.name: custom-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: custom-sa
+
+  # ── Termination ─────────────────────────────────────────────────────────────
+  - it: should set termination grace period
+    asserts:
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 15
+
+  # ── Selector labels ─────────────────────────────────────────────────────────
+  - it: should have matching selector and template labels
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: atlassian
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: test-release
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: atlassian
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: test-release

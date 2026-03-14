@@ -1,0 +1,40 @@
+suite: notes
+templates:
+  - NOTES.txt
+release:
+  name: test-release
+  namespace: test-ns
+tests:
+  - it: should render release name
+    asserts:
+      - matchRegexRaw:
+          pattern: test-release-atlassian
+
+  - it: should show transport type
+    asserts:
+      - matchRegexRaw:
+          pattern: "Transport:\\s+sse"
+
+  - it: should show read-only status
+    asserts:
+      - matchRegexRaw:
+          pattern: "Read-only:\\s+true"
+
+  - it: should show cluster DNS address
+    asserts:
+      - matchRegexRaw:
+          pattern: "test-release-atlassian\\.test-ns\\.svc\\.cluster\\.local:8080"
+
+  - it: should show credential guidance when not using existingSecret
+    asserts:
+      - matchRegexRaw:
+          pattern: secrets\.jiraUsername
+      - matchRegexRaw:
+          pattern: secrets\.jiraToken
+
+  - it: should show existingSecret name when configured
+    set:
+      secrets.existingSecret: my-external-secret
+    asserts:
+      - matchRegexRaw:
+          pattern: my-external-secret

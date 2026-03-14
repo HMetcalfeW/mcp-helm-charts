@@ -1,0 +1,85 @@
+suite: configmap
+templates:
+  - configmap.yaml
+release:
+  name: test-release
+  namespace: test-ns
+tests:
+  - it: should render a ConfigMap
+    asserts:
+      - isKind:
+          of: ConfigMap
+
+  - it: should set the correct name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-atlassian-config
+
+  - it: should include standard labels
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: atlassian
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: test-release
+
+  - it: should have empty data when no config is set
+    asserts:
+      - notExists:
+          path: data.JIRA_URL
+      - notExists:
+          path: data.CONFLUENCE_URL
+      - notExists:
+          path: data.CONFLUENCE_SPACES_FILTER
+      - notExists:
+          path: data.JIRA_PROJECTS_FILTER
+
+  - it: should set JIRA_URL when configured
+    set:
+      config.jiraURL: https://my-domain.atlassian.net
+    asserts:
+      - equal:
+          path: data.JIRA_URL
+          value: "https://my-domain.atlassian.net"
+
+  - it: should set CONFLUENCE_URL when configured
+    set:
+      config.confluenceURL: https://my-domain.atlassian.net/wiki
+    asserts:
+      - equal:
+          path: data.CONFLUENCE_URL
+          value: "https://my-domain.atlassian.net/wiki"
+
+  - it: should set filter values when configured
+    set:
+      config.confluenceSpacesFilter: "ENG,DOCS"
+      config.jiraProjectsFilter: "PROJ,OPS"
+    asserts:
+      - equal:
+          path: data.CONFLUENCE_SPACES_FILTER
+          value: "ENG,DOCS"
+      - equal:
+          path: data.JIRA_PROJECTS_FILTER
+          value: "PROJ,OPS"
+
+  - it: should set all config values together
+    set:
+      config.jiraURL: https://my-domain.atlassian.net
+      config.confluenceURL: https://my-domain.atlassian.net/wiki
+      config.confluenceSpacesFilter: "ENG"
+      config.jiraProjectsFilter: "PROJ"
+    asserts:
+      - equal:
+          path: data.JIRA_URL
+          value: "https://my-domain.atlassian.net"
+      - equal:
+          path: data.CONFLUENCE_URL
+          value: "https://my-domain.atlassian.net/wiki"
+      - equal:
+          path: data.CONFLUENCE_SPACES_FILTER
+          value: "ENG"
+      - equal:
+          path: data.JIRA_PROJECTS_FILTER
+          value: "PROJ"

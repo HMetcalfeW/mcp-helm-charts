@@ -12,8 +12,10 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ toJson .Values.config | sha256sum }}
+        {{- if not .Values.secrets.existingSecret }}
+        checksum/secret: {{ toJson .Values.secrets | sha256sum }}
+        {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -55,7 +57,7 @@ spec:
             - configMapRef:
                 name: {{ include "atlassian.fullname" . }}-config
             - secretRef:
-                name: {{ include "atlassian.fullname" . }}-secrets
+                name: {{ .Values.secrets.existingSecret | default (printf "%s-secrets" (include "atlassian.fullname" .)) }}
           startupProbe:
             {{- toYaml .Values.startupProbe | nindent 12 }}
           livenessProbe:
@@ -64,3 +66,13 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /home/app/.cache
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}

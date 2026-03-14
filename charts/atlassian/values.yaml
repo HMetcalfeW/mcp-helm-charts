@@ -48,6 +48,11 @@ config:
 # Injected at deploy time via --set or external-secrets.
 # NEVER commit real values here.
 secrets:
+  # Name of a pre-existing Secret containing Atlassian credentials.
+  # When set, the chart will NOT create its own Secret resource.
+  # The referenced Secret must contain these keys:
+  #   JIRA_USERNAME, JIRA_API_TOKEN, CONFLUENCE_USERNAME, CONFLUENCE_API_TOKEN
+  existingSecret: ""
   # Atlassian Cloud: username (email) + API token
   jiraUsername: ""
   jiraToken: ""
@@ -58,20 +63,20 @@ secrets:
 # FastMCP does not expose /health — use TCP socket on the server port.
 startupProbe:
   tcpSocket:
-    port: 8080
+    port: http
   failureThreshold: 30
   periodSeconds: 2
 
 livenessProbe:
   tcpSocket:
-    port: 8080
+    port: http
   periodSeconds: 15
   timeoutSeconds: 2
   failureThreshold: 3
 
 readinessProbe:
   tcpSocket:
-    port: 8080
+    port: http
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 2
@@ -92,8 +97,7 @@ podSecurityContext:
 
 securityContext:
   allowPrivilegeEscalation: false
-  # Python needs writable __pycache__ and /tmp
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
       - ALL

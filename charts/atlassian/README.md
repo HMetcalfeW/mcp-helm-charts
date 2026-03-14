@@ -33,6 +33,7 @@ helm install atlassian mcp-helm-charts/atlassian \
 | `config.confluenceURL` | Confluence instance URL | `""` |
 | `config.confluenceSpacesFilter` | Comma-separated space keys to filter | `""` |
 | `config.jiraProjectsFilter` | Comma-separated project keys to filter | `""` |
+| `secrets.existingSecret` | Name of pre-existing Secret (skips Secret creation) | `""` |
 | `secrets.jiraUsername` | Jira username (email for Cloud) | `""` |
 | `secrets.jiraToken` | Jira API token | `""` |
 | `secrets.confluenceUsername` | Confluence username (email for Cloud) | `""` |
@@ -45,6 +46,29 @@ helm install atlassian mcp-helm-charts/atlassian \
 | `resources.limits.memory` | Memory limit | `512Mi` |
 | `serviceAccount.create` | Create a service account | `true` |
 | `podSecurityContext.runAsNonRoot` | Run as non-root | `true` |
+| `securityContext.readOnlyRootFilesystem` | Read-only root filesystem | `true` |
+
+## Using an Existing Secret
+
+To use credentials managed externally (e.g., via External Secrets Operator or Sealed Secrets), first create the Secret:
+
+```bash
+kubectl create secret generic my-atlassian-credentials \
+  --namespace <your-namespace> \
+  --from-literal=JIRA_USERNAME=you@example.com \
+  --from-literal=JIRA_API_TOKEN=your-jira-api-token \
+  --from-literal=CONFLUENCE_USERNAME=you@example.com \
+  --from-literal=CONFLUENCE_API_TOKEN=your-confluence-api-token
+```
+
+Then reference it in your values:
+
+```yaml
+secrets:
+  existingSecret: my-atlassian-credentials
+```
+
+The referenced Secret must contain these keys: `JIRA_USERNAME`, `JIRA_API_TOKEN`, `CONFLUENCE_USERNAME`, `CONFLUENCE_API_TOKEN`.
 
 ## Authentication
 
@@ -61,4 +85,5 @@ server:
 
 - The server runs in **read-only mode** by default. Set `server.readOnly: false` to enable write operations.
 - Health probes use TCP socket checks since FastMCP does not expose HTTP health endpoints.
+- The container runs with a **read-only root filesystem**. Writable paths (`/tmp`, `/home/app/.cache`) are mounted as `emptyDir` volumes.
 - The container image runs as the `app` user; the pod security context overrides to UID 1001.
