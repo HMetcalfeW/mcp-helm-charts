@@ -37,13 +37,7 @@ All charts in this repo follow a consistent structure:
 
 ## Contributing
 
-Contributions are welcome! To add a new chart:
-
-1. Create a directory under `charts/<name>/`
-2. Follow the structure of an existing chart (e.g., `charts/atlassian/`)
-3. Include a `README.md` with install instructions and a configuration table
-4. Ensure `helm lint` and `helm template` pass
-5. Open a PR — CI will lint and validate automatically
+See [CONTRIBUTING.md](CONTRIBUTING.md) for chart conventions, testing requirements, and how to add a new chart.
 
 Check the [ROADMAP.md](ROADMAP.md) for charts we're looking for.
 
