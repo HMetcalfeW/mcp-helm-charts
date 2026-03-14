@@ -2,7 +2,10 @@ CHART ?=
 
 # ── Lint ─────────────────────────────────────────────────────────────────────
 .PHONY: lint
-lint: ## Lint all charts (or one: make lint CHART=atlassian)
+lint: lint-charts lint-scripts ## Lint charts and scripts
+
+.PHONY: lint-charts
+lint-charts: ## Lint all Helm charts (or one: make lint-charts CHART=atlassian)
 ifdef CHART
 	helm lint charts/$(CHART)
 else
@@ -11,6 +14,11 @@ else
 		helm lint "$$chart" || exit 1; \
 	done
 endif
+
+.PHONY: lint-scripts
+lint-scripts: ## Lint shell scripts with shellcheck
+	@echo "==> Running shellcheck..."
+	shellcheck scripts/*.sh
 
 # ── Template ─────────────────────────────────────────────────────────────────
 .PHONY: template
@@ -60,34 +68,11 @@ kind-teardown: ## Delete kind test cluster
 
 # ── Smoke Test (real Atlassian instance) ─────────────────────────────────────
 .PHONY: smoke-test
-smoke-test: ## Smoke test against a real Atlassian instance (requires JIRA_URL, JIRA_USERNAME, JIRA_API_TOKEN)
+smoke-test: ## Smoke test with real credentials (make smoke-test CHART=atlassian)
 ifndef CHART
 	$(error CHART is required. Usage: make smoke-test CHART=atlassian)
 endif
-	@if ! kind get clusters 2>/dev/null | grep -q mcp-helm-test; then \
-		echo "==> Creating kind cluster..."; \
-		kind create cluster --name mcp-helm-test; \
-	fi
-	@echo "==> Creating test credentials secret..."
-	kubectl create namespace mcp-test --dry-run=client -o yaml | kubectl apply -f -
-	kubectl create secret generic atlassian-smoke-creds \
-		--namespace mcp-test \
-		--from-literal=JIRA_USERNAME=$${JIRA_USERNAME} \
-		--from-literal=JIRA_API_TOKEN=$${JIRA_API_TOKEN} \
-		--from-literal=CONFLUENCE_USERNAME=$${CONFLUENCE_USERNAME:-$$JIRA_USERNAME} \
-		--from-literal=CONFLUENCE_API_TOKEN=$${CONFLUENCE_API_TOKEN:-$$JIRA_API_TOKEN} \
-		--dry-run=client -o yaml | kubectl apply -f -
-	helm upgrade --install smoke-$(CHART) charts/$(CHART) \
-		--namespace mcp-test \
-		--set config.jiraURL=$${JIRA_URL} \
-		--set config.confluenceURL=$${CONFLUENCE_URL:-$$JIRA_URL/wiki} \
-		--set secrets.existingSecret=atlassian-smoke-creds \
-		--wait --timeout 120s
-	@echo "==> Smoke test: verifying pod is ready..."
-	kubectl wait --for=condition=ready pod \
-		-l app.kubernetes.io/instance=smoke-$(CHART) \
-		--namespace mcp-test --timeout=90s
-	@echo "==> Smoke test passed — pod is running and ready"
+	./scripts/smoke-test.sh $(CHART)
 
 # ── CI ───────────────────────────────────────────────────────────────────────
 .PHONY: ci

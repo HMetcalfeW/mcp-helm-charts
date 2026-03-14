@@ -1,0 +1,32 @@
+# ci/install-values.yaml — used by `ct install` to verify the chart installs
+# into a kind cluster without real Atlassian credentials.
+#
+# The MCP server will start its HTTP listener on the configured port
+# regardless of credential validity, so TCP probes will pass. We relax the
+# startup probe to give the image time to pull and the process time to boot
+# in resource-constrained CI runners.
+
+config:
+  jiraURL: "https://ci-test.atlassian.net"
+  confluenceURL: "https://ci-test.atlassian.net/wiki"
+
+secrets:
+  jiraUsername: "ci@example.com"
+  jiraToken: "ci-dummy-token"
+  confluenceUsername: "ci@example.com"
+  confluenceToken: "ci-dummy-token"
+
+# Generous startup window for CI runners (slow image pull)
+startupProbe:
+  tcpSocket:
+    port: http
+  failureThreshold: 60
+  periodSeconds: 3
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
