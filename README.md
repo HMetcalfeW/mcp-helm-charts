@@ -13,7 +13,7 @@ See [ROADMAP.md](ROADMAP.md) for upcoming charts.
 ## Usage
 
 ```bash
-helm repo add mcp-helm-charts https://hmetcalfe.github.io/mcp-helm-charts
+helm repo add mcp-helm-charts https://hmetcalfew.github.io/mcp-helm-charts
 helm repo update
 helm search repo mcp-helm-charts
 ```

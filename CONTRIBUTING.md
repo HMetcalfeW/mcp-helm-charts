@@ -7,7 +7,7 @@ Thank you for your interest in contributing to MCP Helm Charts.
 Charts are published automatically via [chart-releaser-action](https://github.com/helm/chart-releaser-action) on merge to `main`. The Helm repository is hosted on GitHub Pages:
 
 ```bash
-helm repo add mcp-helm-charts https://hmetcalfe.github.io/mcp-helm-charts
+helm repo add mcp-helm-charts https://hmetcalfew.github.io/mcp-helm-charts
 helm repo update
 helm search repo mcp-helm-charts
 ```
