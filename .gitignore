@@ -11,5 +11,8 @@ Thumbs.db
 # Helm
 *.tgz
 
+# Credentials
+.env
+
 # Claude Code
 .claude/settings.local.json

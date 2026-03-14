@@ -18,7 +18,7 @@ endif
 .PHONY: lint-scripts
 lint-scripts: ## Lint shell scripts with shellcheck
 	@echo "==> Running shellcheck..."
-	shellcheck scripts/*.sh
+	shellcheck -x -P scripts scripts/*.sh
 
 # ── Template ─────────────────────────────────────────────────────────────────
 .PHONY: template
@@ -66,13 +66,15 @@ endif
 kind-teardown: ## Delete kind test cluster
 	kind delete cluster --name mcp-helm-test
 
-# ── Smoke Test (real Atlassian instance) ─────────────────────────────────────
+# ── Smoke Test ───────────────────────────────────────────────────────────────
 .PHONY: smoke-test
 smoke-test: ## Smoke test with real credentials (make smoke-test CHART=atlassian)
 ifndef CHART
 	$(error CHART is required. Usage: make smoke-test CHART=atlassian)
 endif
-	./scripts/smoke-test.sh $(CHART)
+	@test -x scripts/smoke-test-$(CHART).sh || \
+		{ echo "Error: scripts/smoke-test-$(CHART).sh not found"; exit 1; }
+	./scripts/smoke-test-$(CHART).sh
 
 # ── CI ───────────────────────────────────────────────────────────────────────
 .PHONY: ci
