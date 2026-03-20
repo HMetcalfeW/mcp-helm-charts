@@ -1,0 +1,55 @@
+apiVersion: v1
+entries:
+  atlassian:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-03-20T13:37:07.963406456Z"
+    description: Helm chart for the Atlassian MCP server — Jira and Confluence access
+      via Model Context Protocol
+    digest: 3be62dc0ef2eb789dbcd157a67e7bc8bef3379156efb90843548e4281c49a72c
+    home: https://github.com/sooperset/mcp-atlassian
+    keywords:
+    - mcp
+    - atlassian
+    - jira
+    - confluence
+    - model-context-protocol
+    maintainers:
+    - name: Hunter Metcalfe
+      url: https://github.com/HMetcalfeW
+    name: atlassian
+    sources:
+    - https://hub.docker.com/r/mcp/atlassian
+    - https://github.com/sooperset/mcp-atlassian
+    type: application
+    urls:
+    - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/atlassian-0.1.0/atlassian-0.1.0.tgz
+    version: 0.1.0
+  mcp-server:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-03-20T13:37:08.157158314Z"
+    description: Generic Helm chart for deploying any stdio-based MCP server on Kubernetes
+      using supergateway
+    digest: e0009645f02d8bb6f784c1cea6d878ff2be28b329916766cdce50f846e3280cb
+    home: https://github.com/HMetcalfe/mcp-helm-charts
+    keywords:
+    - mcp
+    - model-context-protocol
+    - supergateway
+    - stdio
+    - streamable-http
+    - sse
+    maintainers:
+    - name: Hunter Metcalfe
+      url: https://github.com/HMetcalfe
+    name: mcp-server
+    sources:
+    - https://github.com/HMetcalfe/mcp-helm-charts
+    - https://hub.docker.com/r/supercorp/supergateway
+    - https://github.com/supercorp-ai/supergateway
+    type: application
+    urls:
+    - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/mcp-server-0.1.0/mcp-server-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-03-20T13:37:08.157163137Z"
