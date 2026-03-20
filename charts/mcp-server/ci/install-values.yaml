@@ -1,0 +1,2 @@
+# CI lint/install values — provides required fields so ct lint and ct install pass.
+command: "uvx mcp-server-fetch"

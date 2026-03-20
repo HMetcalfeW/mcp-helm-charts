@@ -1,0 +1,19 @@
+apiVersion: v2
+name: atlassian
+description: Helm chart for the Atlassian MCP server — Jira and Confluence access via Model Context Protocol
+type: application
+version: 0.1.0
+appVersion: "latest"
+home: https://github.com/sooperset/mcp-atlassian
+sources:
+  - https://hub.docker.com/r/mcp/atlassian
+  - https://github.com/sooperset/mcp-atlassian
+keywords:
+  - mcp
+  - atlassian
+  - jira
+  - confluence
+  - model-context-protocol
+maintainers:
+  - name: Hunter Metcalfe
+    url: https://github.com/HMetcalfeW

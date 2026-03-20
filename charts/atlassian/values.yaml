@@ -1,0 +1,105 @@
+# ── Image ──────────────────────────────────────────────────────────────────────
+image:
+  name: mcp/atlassian
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# ── Replica / Scaling ────────────────────────────────────────────────────────
+replicaCount: 1
+
+# ── Resources ────────────────────────────────────────────────────────────────
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# ── Service ──────────────────────────────────────────────────────────────────
+service:
+  type: ClusterIP
+  port: 8080
+
+# ── Server ───────────────────────────────────────────────────────────────────
+server:
+  # Transport protocol: sse or streamable-http
+  transport: sse
+  port: 8080
+  # Run in read-only mode (disables all write operations)
+  readOnly: true
+  # Extra CLI flags passed to mcp-atlassian (e.g., ["--enabled-tools", "jira_search,confluence_search"])
+  extraArgs: []
+
+# ── Atlassian Configuration (ConfigMap) ──────────────────────────────────────
+config:
+  # Jira instance URL (Cloud or Server/Data Center)
+  jiraURL: ""
+  # Confluence instance URL (Cloud: https://your-domain.atlassian.net/wiki)
+  confluenceURL: ""
+  # Comma-separated Confluence space keys to filter search results (optional)
+  confluenceSpacesFilter: ""
+  # Comma-separated Jira project keys to filter search results (optional)
+  jiraProjectsFilter: ""
+
+# ── Sensitive credentials (k8s Secret) ───────────────────────────────────────
+# Injected at deploy time via --set or external-secrets.
+# NEVER commit real values here.
+secrets:
+  # Name of a pre-existing Secret containing Atlassian credentials.
+  # When set, the chart will NOT create its own Secret resource.
+  # The referenced Secret must contain these keys:
+  #   JIRA_USERNAME, JIRA_API_TOKEN, CONFLUENCE_USERNAME, CONFLUENCE_API_TOKEN
+  existingSecret: ""
+  # Atlassian Cloud: username (email) + API token
+  jiraUsername: ""
+  jiraToken: ""
+  confluenceUsername: ""
+  confluenceToken: ""
+
+# ── Probes ───────────────────────────────────────────────────────────────────
+# FastMCP does not expose /health — use TCP socket on the server port.
+startupProbe:
+  tcpSocket:
+    port: http
+  failureThreshold: 30
+  periodSeconds: 2
+
+livenessProbe:
+  tcpSocket:
+    port: http
+  periodSeconds: 15
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  tcpSocket:
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 2
+
+# ── Service Account ──────────────────────────────────────────────────────────
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# ── Pod ──────────────────────────────────────────────────────────────────────
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+terminationGracePeriodSeconds: 15

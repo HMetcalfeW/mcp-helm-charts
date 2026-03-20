@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["image", "server", "config", "secrets"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["name", "tag"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Docker image name",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string",
+          "description": "Docker image tag",
+          "minLength": 1
+        },
+        "pullPolicy": {
+          "type": "string",
+          "description": "Image pull policy",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "description": "Image pull secrets for private registries",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "description": "Number of pod replicas",
+      "minimum": 1
+    },
+    "resources": {
+      "type": "object",
+      "description": "Container resource requests and limits",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[0-9]+m?$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+(Mi|Gi|Ki)$"
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[0-9]+m?$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+(Mi|Gi|Ki)$"
+            }
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Kubernetes service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+        },
+        "port": {
+          "type": "integer",
+          "description": "Service port",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "required": ["transport", "port"],
+      "properties": {
+        "transport": {
+          "type": "string",
+          "description": "MCP transport protocol",
+          "enum": ["sse", "streamable-http"]
+        },
+        "port": {
+          "type": "integer",
+          "description": "Server listen port",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Disable write operations"
+        },
+        "extraArgs": {
+          "type": "array",
+          "description": "Additional CLI flags passed to mcp-atlassian",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "config": {
+      "type": "object",
+      "description": "Atlassian configuration (stored in ConfigMap)",
+      "properties": {
+        "jiraURL": {
+          "type": "string",
+          "description": "Jira instance URL"
+        },
+        "confluenceURL": {
+          "type": "string",
+          "description": "Confluence instance URL"
+        },
+        "confluenceSpacesFilter": {
+          "type": "string",
+          "description": "Comma-separated Confluence space keys to filter"
+        },
+        "jiraProjectsFilter": {
+          "type": "string",
+          "description": "Comma-separated Jira project keys to filter"
+        }
+      },
+      "additionalProperties": false
+    },
+    "secrets": {
+      "type": "object",
+      "description": "Sensitive credentials (stored in k8s Secret)",
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "description": "Name of pre-existing Secret containing Atlassian credentials"
+        },
+        "jiraUsername": {
+          "type": "string",
+          "description": "Jira username (email for Cloud)"
+        },
+        "jiraToken": {
+          "type": "string",
+          "description": "Jira API token"
+        },
+        "confluenceUsername": {
+          "type": "string",
+          "description": "Confluence username (email for Cloud)"
+        },
+        "confluenceToken": {
+          "type": "string",
+          "description": "Confluence API token"
+        }
+      },
+      "additionalProperties": false
+    },
+    "startupProbe": {
+      "type": "object",
+      "description": "Startup probe configuration"
+    },
+    "livenessProbe": {
+      "type": "object",
+      "description": "Liveness probe configuration"
+    },
+    "readinessProbe": {
+      "type": "object",
+      "description": "Readiness probe configuration"
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create a service account"
+        },
+        "name": {
+          "type": "string",
+          "description": "Service account name override"
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Service account annotations"
+        }
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "description": "Additional pod annotations"
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Pod-level security context",
+      "properties": {
+        "runAsNonRoot": {
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fsGroup": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container-level security context",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "type": "boolean"
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean"
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "drop": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "add": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "terminationGracePeriodSeconds": {
+      "type": "integer",
+      "description": "Termination grace period in seconds",
+      "minimum": 0
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full release name"
+    }
+  }
+}

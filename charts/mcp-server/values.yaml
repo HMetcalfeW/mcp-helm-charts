@@ -1,0 +1,123 @@
+# ── MCP Server ─────────────────────────────────────────────────────────────────
+# The stdio command that supergateway wraps and exposes over HTTP.
+# This is the only required value — everything else has sensible defaults.
+#
+# Examples:
+#   command: "uvx mcp-server-fetch"
+#   command: "uvx awslabs.aws-documentation-mcp-server@latest"
+#   command: "npx -y @modelcontextprotocol/server-github"
+#   command: "npx -y @anthropic/mcp-server-fetch"
+command: ""
+
+# ── Image ──────────────────────────────────────────────────────────────────────
+# supergateway wraps any stdio MCP server and exposes it as Streamable HTTP or SSE.
+# The :uvx tag includes Python/uvx; use :latest for Node-only servers.
+image:
+  repository: supercorp/supergateway
+  tag: "uvx"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# ── Transport ──────────────────────────────────────────────────────────────────
+server:
+  # Transport protocol: streamableHttp or sse
+  transport: streamableHttp
+  port: 8000
+  # Extra CLI flags passed to supergateway (e.g., ["--logLevel", "debug"])
+  extraArgs: []
+
+# ── Replica / Scaling ──────────────────────────────────────────────────────────
+replicaCount: 1
+
+# ── Resources ──────────────────────────────────────────────────────────────────
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# ── Service ────────────────────────────────────────────────────────────────────
+service:
+  type: ClusterIP
+  port: 8000
+
+# ── Environment Variables ──────────────────────────────────────────────────────
+# Non-sensitive environment variables injected into the container.
+# Use for server configuration flags, API endpoints, feature toggles, etc.
+env: {}
+# env:
+#   SOME_CONFIG: "value"
+
+# ── Secrets ────────────────────────────────────────────────────────────────────
+# Sensitive values injected as env vars from a k8s Secret.
+# Values are base64-encoded automatically by the template.
+# NEVER commit real credentials here — use --set at deploy time.
+secrets: {}
+# secrets:
+#   API_TOKEN: ""
+#   SOME_SECRET: ""
+
+# Alternatively, reference an existing k8s Secret instead of creating one.
+# When set, the chart does not create a Secret resource.
+existingSecret: ""
+
+# ── Probes ─────────────────────────────────────────────────────────────────────
+# supergateway exposes /health when --healthEndpoint is set.
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 30
+  periodSeconds: 2
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 30
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 2
+
+# ── Service Account ────────────────────────────────────────────────────────────
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# ── Pod ────────────────────────────────────────────────────────────────────────
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  # Python/Node need writable /tmp and __pycache__
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+terminationGracePeriodSeconds: 15
+
+# ── Scheduling ─────────────────────────────────────────────────────────────────
+nodeSelector: {}
+tolerations: []
+affinity: {}

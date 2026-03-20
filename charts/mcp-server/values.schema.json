@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["command"],
+  "properties": {
+    "command": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The stdio MCP server command that supergateway wraps (e.g., 'uvx mcp-server-fetch')"
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": { "type": "string", "enum": ["Always", "IfNotPresent", "Never"] }
+      }
+    },
+    "server": {
+      "type": "object",
+      "properties": {
+        "transport": {
+          "type": "string",
+          "enum": ["streamableHttp", "sse"],
+          "description": "Output transport protocol"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "extraArgs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["ClusterIP", "NodePort", "LoadBalancer"] },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+      }
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "secrets": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "existingSecret": {
+      "type": "string"
+    },
+    "resources": { "type": "object" },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "replicaCount": { "type": "integer", "minimum": 0 },
+    "terminationGracePeriodSeconds": { "type": "integer", "minimum": 0 },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "annotations": { "type": "object" }
+      }
+    }
+  }
+}

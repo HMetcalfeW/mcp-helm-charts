@@ -1,0 +1,23 @@
+{{ include "atlassian.fullname" . }} has been deployed.
+
+  Transport: {{ .Values.server.transport }}
+  Read-only: {{ .Values.server.readOnly }}
+  Port:      {{ .Values.service.port }}
+
+Access the MCP server within your cluster:
+
+  {{ include "atlassian.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+{{- if not .Values.secrets.existingSecret }}
+
+Credentials are stored in Secret "{{ include "atlassian.fullname" . }}-secrets".
+Ensure you have configured Atlassian credentials via --set or external-secrets:
+
+  secrets.jiraUsername
+  secrets.jiraToken
+  secrets.confluenceUsername
+  secrets.confluenceToken
+{{- else }}
+
+Using existing Secret "{{ .Values.secrets.existingSecret }}" for credentials.
+{{- end }}
