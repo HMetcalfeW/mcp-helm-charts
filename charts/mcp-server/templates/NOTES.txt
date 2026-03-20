@@ -1,0 +1,25 @@
+{{- if not .Values.command }}
+⚠️  WARNING: No command specified. Set `command` to the stdio MCP server command.
+
+    helm upgrade {{ .Release.Name }} mcp-helm-charts/mcp-server \
+      --set command="uvx mcp-server-fetch"
+
+{{- else }}
+
+{{ .Release.Name }} is running: {{ .Values.command }}
+
+Transport: {{ .Values.server.transport }} on port {{ .Values.server.port }}
+
+Get the service endpoint:
+
+    kubectl get svc {{ include "mcp-server.fullname" . }} -n {{ .Release.Namespace }}
+
+Connect from within the cluster:
+
+    {{ include "mcp-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/mcp
+
+Port-forward for local testing:
+
+    kubectl port-forward svc/{{ include "mcp-server.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+
+{{- end }}
