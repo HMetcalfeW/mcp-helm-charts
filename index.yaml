@@ -3,6 +3,30 @@ entries:
   atlassian:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-03-25T18:58:56.161796673Z"
+    description: Helm chart for the Atlassian MCP server — Jira and Confluence access
+      via Model Context Protocol
+    digest: 18649772e160406d8a51ee2f1ba7780c27f585f331d5afe3af02e97bcec6c317
+    home: https://github.com/sooperset/mcp-atlassian
+    keywords:
+    - mcp
+    - atlassian
+    - jira
+    - confluence
+    - model-context-protocol
+    maintainers:
+    - name: Hunter Metcalfe
+      url: https://github.com/HMetcalfeW
+    name: atlassian
+    sources:
+    - https://hub.docker.com/r/mcp/atlassian
+    - https://github.com/sooperset/mcp-atlassian
+    type: application
+    urls:
+    - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/atlassian-0.1.1/atlassian-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: latest
     created: "2026-03-20T13:37:07.963406456Z"
     description: Helm chart for the Atlassian MCP server — Jira and Confluence access
       via Model Context Protocol
@@ -26,6 +50,32 @@ entries:
     - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/atlassian-0.1.0/atlassian-0.1.0.tgz
     version: 0.1.0
   mcp-server:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-03-25T18:58:56.327932332Z"
+    description: Generic Helm chart for deploying any stdio-based MCP server on Kubernetes
+      using supergateway
+    digest: 0e28e28c7edebf86706a28d36e06a3861661247311319880a6fbcc3bb854fb71
+    home: https://github.com/HMetcalfe/mcp-helm-charts
+    keywords:
+    - mcp
+    - model-context-protocol
+    - supergateway
+    - stdio
+    - streamable-http
+    - sse
+    maintainers:
+    - name: Hunter Metcalfe
+      url: https://github.com/HMetcalfe
+    name: mcp-server
+    sources:
+    - https://github.com/HMetcalfe/mcp-helm-charts
+    - https://hub.docker.com/r/supercorp/supergateway
+    - https://github.com/supercorp-ai/supergateway
+    type: application
+    urls:
+    - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/mcp-server-0.1.1/mcp-server-0.1.1.tgz
+    version: 0.1.1
   - apiVersion: v2
     appVersion: latest
     created: "2026-03-20T13:37:08.157158314Z"
@@ -52,4 +102,4 @@ entries:
     urls:
     - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/mcp-server-0.1.0/mcp-server-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-20T13:37:08.157163137Z"
+generated: "2026-03-25T18:58:56.327944535Z"
