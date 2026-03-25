@@ -207,10 +207,13 @@ tests:
           value: true
       - equal:
           path: spec.template.spec.securityContext.runAsUser
-          value: 1001
+          value: 10001
       - equal:
           path: spec.template.spec.securityContext.runAsGroup
-          value: 1001
+          value: 10001
+      - equal:
+          path: spec.template.spec.securityContext.seccompProfile.type
+          value: RuntimeDefault
 
   - it: should set container security context
     asserts:
@@ -223,6 +226,9 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].securityContext.capabilities.drop
           content: ALL
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.seccompProfile.type
+          value: RuntimeDefault
 
   # ── Volumes / volume mounts ─────────────────────────────────────────────────
   - it: should mount tmp and cache as emptyDir
