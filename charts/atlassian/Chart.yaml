@@ -2,7 +2,7 @@ apiVersion: v2
 name: atlassian
 description: Helm chart for the Atlassian MCP server — Jira and Confluence access via Model Context Protocol
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "latest"
 home: https://github.com/sooperset/mcp-atlassian
 sources:

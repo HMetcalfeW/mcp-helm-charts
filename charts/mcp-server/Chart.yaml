@@ -2,7 +2,7 @@ apiVersion: v2
 name: mcp-server
 description: Generic Helm chart for deploying any stdio-based MCP server on Kubernetes using supergateway
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "latest"
 home: https://github.com/HMetcalfe/mcp-helm-charts
 sources:
