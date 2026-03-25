@@ -1,0 +1,11 @@
+# KSV-0110: Helm renders into "default" namespace without -n flag.
+# Real deployments specify namespace via helm install -n.
+KSV-0110
+
+# KSV-0125: supercorp/supergateway and ghcr.io/metcalfc/mcp-atlassian flagged
+# as "untrusted" registries. These are the canonical upstream images.
+KSV-0125
+
+# KSV-0013: atlassian chart defaults to tag "latest" — the upstream project
+# does not publish stable semver tags yet. Pin when available.
+KSV-0013

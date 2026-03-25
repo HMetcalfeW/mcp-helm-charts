@@ -44,6 +44,42 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --config ct.yaml
 
+  trivy:
+    name: Trivy security scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.17.1
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update && sudo apt-get install -y trivy
+
+      - name: Render charts for scanning
+        run: |
+          mkdir -p /tmp/rendered
+          for chart in charts/*/; do
+            name=$(basename "$chart")
+            case "$name" in
+              mcp-server) helm template test "$chart" --set command="uvx test-server" --output-dir /tmp/rendered ;;
+              *)          helm template test "$chart" --output-dir /tmp/rendered 2>/dev/null || true ;;
+            esac
+          done
+
+      - name: Scan rendered templates (misconfig)
+        run: trivy fs --severity MEDIUM,HIGH,CRITICAL --scanners misconfig --ignorefile .trivyignore --exit-code 1 /tmp/rendered
+
+      - name: Scan filesystem (vulns + secrets)
+        run: trivy fs --severity MEDIUM,HIGH,CRITICAL --scanners vuln,secret --exit-code 1 .
+
   shellcheck:
     runs-on: ubuntu-latest
     steps:
