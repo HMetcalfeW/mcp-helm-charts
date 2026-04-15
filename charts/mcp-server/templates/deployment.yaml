@@ -1,4 +1,11 @@
-{{- $command := required "command is required — set to the stdio MCP server command (e.g., 'uvx mcp-server-fetch')" .Values.command -}}
+{{- if eq .Values.mode "supergateway" }}
+{{- $command := required "command is required in supergateway mode — set to the stdio MCP server command (e.g., 'uvx mcp-server-fetch')" .Values.command -}}
+{{- end }}
+{{- if eq .Values.mode "native" }}
+{{- if not .Values.nativeCommand }}
+{{- fail "nativeCommand is required in native mode — set to the container command (e.g., [\"mcp\", \"run\"])" }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,18 +55,27 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if eq .Values.mode "supergateway" }}
           args:
             - "--stdio"
-            - {{ $command | quote }}
+            - {{ .Values.command | quote }}
             - "--port"
             - {{ .Values.server.port | quote }}
             - "--outputTransport"
             - {{ .Values.server.transport | quote }}
             - "--healthEndpoint"
-            - "/health"
+            - {{ .Values.server.healthEndpoint | quote }}
             {{- with .Values.server.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- else }}
+          command:
+            {{- toYaml .Values.nativeCommand | nindent 12 }}
+          {{- with .Values.nativeArgs }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.server.port }}
@@ -89,8 +105,12 @@ spec:
       volumes:
         - name: tmp
           emptyDir:
+            {{- if eq .Values.mode "supergateway" }}
             medium: Memory
             sizeLimit: 512Mi
+            {{- else }}
+            sizeLimit: 128Mi
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

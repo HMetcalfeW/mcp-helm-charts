@@ -1,0 +1,6 @@
+# Default owners for the entire repo
+* @HMetcalfeW
+
+# Chart-specific owners
+/charts/mcp-server/ @HMetcalfeW
+/charts/atlassian/  @HMetcalfeW
