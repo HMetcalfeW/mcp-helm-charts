@@ -92,11 +92,38 @@ spec:
             {{- end }}
           {{- end }}
           startupProbe:
-            {{- toYaml .Values.startupProbe | nindent 12 }}
+            {{- toYaml (omit .Values.startupProbe "httpGet" "tcpSocket" "grpc" "exec") | nindent 12 }}
+            {{- if .Values.startupProbe.tcpSocket }}
+            tcpSocket: {{- toYaml .Values.startupProbe.tcpSocket | nindent 14 }}
+            {{- else if .Values.startupProbe.exec }}
+            exec: {{- toYaml .Values.startupProbe.exec | nindent 14 }}
+            {{- else if .Values.startupProbe.grpc }}
+            grpc: {{- toYaml .Values.startupProbe.grpc | nindent 14 }}
+            {{- else }}
+            httpGet: {{- toYaml .Values.startupProbe.httpGet | nindent 14 }}
+            {{- end }}
           livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
+            {{- toYaml (omit .Values.livenessProbe "httpGet" "tcpSocket" "grpc" "exec") | nindent 12 }}
+            {{- if .Values.livenessProbe.tcpSocket }}
+            tcpSocket: {{- toYaml .Values.livenessProbe.tcpSocket | nindent 14 }}
+            {{- else if .Values.livenessProbe.exec }}
+            exec: {{- toYaml .Values.livenessProbe.exec | nindent 14 }}
+            {{- else if .Values.livenessProbe.grpc }}
+            grpc: {{- toYaml .Values.livenessProbe.grpc | nindent 14 }}
+            {{- else }}
+            httpGet: {{- toYaml .Values.livenessProbe.httpGet | nindent 14 }}
+            {{- end }}
           readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
+            {{- toYaml (omit .Values.readinessProbe "httpGet" "tcpSocket" "grpc" "exec") | nindent 12 }}
+            {{- if .Values.readinessProbe.tcpSocket }}
+            tcpSocket: {{- toYaml .Values.readinessProbe.tcpSocket | nindent 14 }}
+            {{- else if .Values.readinessProbe.exec }}
+            exec: {{- toYaml .Values.readinessProbe.exec | nindent 14 }}
+            {{- else if .Values.readinessProbe.grpc }}
+            grpc: {{- toYaml .Values.readinessProbe.grpc | nindent 14 }}
+            {{- else }}
+            httpGet: {{- toYaml .Values.readinessProbe.httpGet | nindent 14 }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
