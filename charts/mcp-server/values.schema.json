@@ -1,12 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["command"],
   "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["supergateway", "native"],
+      "description": "Deployment mode: 'supergateway' wraps stdio servers, 'native' runs HTTP servers directly"
+    },
     "command": {
       "type": "string",
-      "minLength": 1,
-      "description": "The stdio MCP server command that supergateway wraps (e.g., 'uvx mcp-server-fetch')"
+      "description": "The stdio MCP server command that supergateway wraps (supergateway mode only)"
+    },
+    "nativeCommand": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Container command for native mode (e.g., [\"mcp\", \"run\"])"
+    },
+    "nativeArgs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Container args for native mode"
     },
     "image": {
       "type": "object",
@@ -22,12 +35,16 @@
         "transport": {
           "type": "string",
           "enum": ["streamableHttp", "sse"],
-          "description": "Output transport protocol"
+          "description": "Output transport protocol (supergateway mode only)"
         },
         "port": {
           "type": "integer",
           "minimum": 1,
           "maximum": 65535
+        },
+        "healthEndpoint": {
+          "type": "string",
+          "description": "Health check endpoint path"
         },
         "extraArgs": {
           "type": "array",
@@ -60,7 +77,6 @@
     "resources": { "type": "object" },
     "nameOverride": { "type": "string" },
     "fullnameOverride": { "type": "string" },
-    "replicaCount": { "type": "integer", "minimum": 0 },
     "terminationGracePeriodSeconds": { "type": "integer", "minimum": 0 },
     "serviceAccount": {
       "type": "object",

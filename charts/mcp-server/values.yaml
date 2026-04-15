@@ -1,6 +1,12 @@
-# ── MCP Server ─────────────────────────────────────────────────────────────────
+# ── Deployment Mode ────────────────────────────────────────────────────────────
+# "supergateway" — wraps a stdio MCP server command via supergateway (default).
+# "native"       — runs the container directly; the server speaks HTTP natively
+#                  (FastMCP, Go SDK, etc). No supergateway wrapper.
+mode: supergateway
+
+# ── Supergateway Mode ─────────────────────────────────────────────────────────
 # The stdio command that supergateway wraps and exposes over HTTP.
-# This is the only required value — everything else has sensible defaults.
+# Required when mode=supergateway, ignored in native mode.
 #
 # Examples:
 #   command: "uvx mcp-server-fetch"
@@ -9,35 +15,54 @@
 #   command: "npx -y @anthropic/mcp-server-fetch"
 command: ""
 
+# ── Native Mode ───────────────────────────────────────────────────────────────
+# Container command and args for native HTTP MCP servers.
+# Ignored in supergateway mode.
+#
+# Examples:
+#   nativeCommand: ["mcp"]
+#   nativeArgs: ["run", "awslabs.aws_documentation_mcp_server.server_aws:mcp",
+#                "--transport", "streamable-http", "--port", "8000"]
+#
+#   nativeCommand: ["python", "-m"]
+#   nativeArgs: ["my_mcp_server", "--host", "0.0.0.0", "--port", "8000"]
+nativeCommand: []
+nativeArgs: []
+
 # ── Image ──────────────────────────────────────────────────────────────────────
-# supergateway wraps any stdio MCP server and exposes it as Streamable HTTP or SSE.
-# The :uvx tag includes Python/uvx; use :latest for Node-only servers.
+# Supergateway mode: defaults to supercorp/supergateway.
+# Native mode: override with your server image (e.g., python:3.12-slim).
 image:
   repository: supercorp/supergateway
-  tag: "uvx"
+  tag: "3.4.1-uvx"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
 # ── Transport ──────────────────────────────────────────────────────────────────
 server:
-  # Transport protocol: streamableHttp or sse
+  # Transport protocol (supergateway mode only): streamableHttp or sse
   transport: streamableHttp
   port: 8000
-  # Extra CLI flags passed to supergateway (e.g., ["--logLevel", "debug"])
+  # Health check endpoint path. Supergateway exposes /health automatically.
+  # Native servers may use a different path (e.g., /healthz, /ready).
+  healthEndpoint: /health
+  # Extra CLI flags passed to supergateway (supergateway mode only).
   extraArgs: []
 
 # ── Replica / Scaling ──────────────────────────────────────────────────────────
 replicaCount: 1
 
 # ── Resources ──────────────────────────────────────────────────────────────────
+# Note: stdio MCP servers wrapped by supergateway (especially Python/uvx-based)
+# can leak memory over time. Set limits appropriately for your server.
+# AWS docs MCP: recommend limits.memory=2Gi with the OOMKill restart as a safety net.
 resources:
   requests:
     cpu: 50m
-    memory: 64Mi
+    memory: 128Mi
   limits:
-    cpu: 200m
-    memory: 256Mi
+    memory: 512Mi
 
 # ── Service ────────────────────────────────────────────────────────────────────
 service:
@@ -65,7 +90,6 @@ secrets: {}
 existingSecret: ""
 
 # ── Probes ─────────────────────────────────────────────────────────────────────
-# supergateway exposes /health when --healthEndpoint is set.
 startupProbe:
   httpGet:
     path: /health

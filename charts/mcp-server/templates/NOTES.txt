@@ -1,14 +1,22 @@
+{{- if eq .Values.mode "supergateway" }}
 {{- if not .Values.command }}
-⚠️  WARNING: No command specified. Set `command` to the stdio MCP server command.
+WARNING: No command specified. Set `command` to the stdio MCP server command.
 
     helm upgrade {{ .Release.Name }} mcp-helm-charts/mcp-server \
       --set command="uvx mcp-server-fetch"
 
 {{- else }}
 
-{{ .Release.Name }} is running: {{ .Values.command }}
+{{ .Release.Name }} is running (supergateway): {{ .Values.command }}
 
 Transport: {{ .Values.server.transport }} on port {{ .Values.server.port }}
+
+{{- end }}
+{{- else }}
+
+{{ .Release.Name }} is running (native) on port {{ .Values.server.port }}
+
+{{- end }}
 
 Get the service endpoint:
 
@@ -21,5 +29,3 @@ Connect from within the cluster:
 Port-forward for local testing:
 
     kubectl port-forward svc/{{ include "mcp-server.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }} -n {{ .Release.Namespace }}
-
-{{- end }}
