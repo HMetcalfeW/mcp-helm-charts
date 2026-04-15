@@ -1,0 +1,31 @@
+apiVersion: v1
+entries:
+  mcp-server:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-04-15T20:30:00.1641767Z"
+    description: Generic Helm chart for deploying MCP servers on Kubernetes — supergateway
+      (stdio wrapper) or native (server speaks HTTP directly)
+    digest: 1137c5fb9e49cd31944d5cdd6dd1e4fcdffa9339e0ee0f4d914d806b9287c47a
+    home: https://github.com/HMetcalfe/mcp-helm-charts
+    keywords:
+    - mcp
+    - model-context-protocol
+    - supergateway
+    - stdio
+    - streamable-http
+    - sse
+    - fastmcp
+    maintainers:
+    - name: Hunter Metcalfe
+      url: https://github.com/HMetcalfe
+    name: mcp-server
+    sources:
+    - https://github.com/HMetcalfe/mcp-helm-charts
+    - https://hub.docker.com/r/supercorp/supergateway
+    - https://github.com/supercorp-ai/supergateway
+    type: application
+    urls:
+    - https://github.com/HMetcalfeW/mcp-helm-charts/releases/download/mcp-server-0.2.0/mcp-server-0.2.0.tgz
+    version: 0.2.0
+generated: "2026-04-15T20:30:00.164182641Z"
