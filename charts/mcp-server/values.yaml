@@ -69,6 +69,17 @@ service:
   type: ClusterIP
   port: 8000
 
+# ── Extra Ports ────────────────────────────────────────────────────────────────
+# A server that serves more than one MCP endpoint from one process, one per
+# port, lists the additional ports here. Each entry adds a named container
+# port and a Service port targeting it by name. Probes stay on server.port.
+# servicePort defaults to containerPort.
+extraPorts: []
+# extraPorts:
+#   - name: second
+#     containerPort: 8001
+#     servicePort: 8001
+
 # ── Environment Variables ──────────────────────────────────────────────────────
 # Non-sensitive environment variables injected into the container.
 # Use for server configuration flags, API endpoints, feature toggles, etc.

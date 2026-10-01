@@ -42,6 +42,14 @@ helm install my-server mcp-helm-charts/mcp-server \
   --set nativeArgs[2]=8000
 ```
 
+A native server that serves more than one MCP endpoint from one process, one per port, adds the extra ports with `extraPorts`. Each entry becomes a named container port and a Service port targeting it, so a gateway can register each endpoint as its own upstream. Probes stay on `server.port`.
+
+```yaml
+extraPorts:
+  - name: second
+    containerPort: 8001
+```
+
 ### Deploy Atlassian MCP
 
 ```bash

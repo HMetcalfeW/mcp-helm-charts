@@ -1,0 +1,73 @@
+suite: extra ports
+templates:
+  - deployment.yaml
+  - service.yaml
+release:
+  name: test-release
+  namespace: test-ns
+set:
+  command: "uvx test-server"
+tests:
+  - it: should expose only the http port by default
+    asserts:
+      - lengthEqual:
+          path: spec.template.spec.containers[0].ports
+          count: 1
+        template: deployment.yaml
+      - lengthEqual:
+          path: spec.ports
+          count: 1
+        template: service.yaml
+
+  - it: should add a named container port and a Service port for each extra port
+    set:
+      extraPorts:
+        - name: second
+          containerPort: 8001
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: second
+            containerPort: 8001
+            protocol: TCP
+        template: deployment.yaml
+      - equal:
+          path: spec.ports[0].name
+          value: http
+        template: service.yaml
+      - contains:
+          path: spec.ports
+          content:
+            name: second
+            port: 8001
+            targetPort: second
+            protocol: TCP
+        template: service.yaml
+
+  - it: should let servicePort differ from containerPort
+    set:
+      extraPorts:
+        - name: second
+          containerPort: 8001
+          servicePort: 9001
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: second
+            port: 9001
+            targetPort: second
+            protocol: TCP
+        template: service.yaml
+
+  - it: should keep the probes on the http port
+    set:
+      extraPorts:
+        - name: second
+          containerPort: 8001
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: http
+        template: deployment.yaml

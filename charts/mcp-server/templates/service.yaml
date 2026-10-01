@@ -11,5 +11,11 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- range .Values.extraPorts }}
+    - port: {{ .servicePort | default .containerPort }}
+      targetPort: {{ .name }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
   selector:
     {{- include "mcp-server.selectorLabels" . | nindent 4 }}

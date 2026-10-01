@@ -80,6 +80,11 @@ spec:
             - name: http
               containerPort: {{ .Values.server.port }}
               protocol: TCP
+            {{- range .Values.extraPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .containerPort }}
+              protocol: TCP
+            {{- end }}
           {{- if or .Values.env .Values.secrets .Values.existingSecret }}
           envFrom:
             {{- if .Values.env }}
