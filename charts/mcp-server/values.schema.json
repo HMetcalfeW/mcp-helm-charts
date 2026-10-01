@@ -63,6 +63,24 @@
         "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
       }
     },
+    "extraPorts": {
+      "type": "array",
+      "description": "Additional named ports, one per extra MCP endpoint the server serves; each adds a container port and a Service port targeting it by name",
+      "items": {
+        "type": "object",
+        "required": ["name", "containerPort"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([-a-z0-9]{0,13}[a-z0-9])?$",
+            "description": "Port name: a DNS label of at most 15 characters, distinct from 'http'"
+          },
+          "containerPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "servicePort": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Service port; defaults to containerPort" }
+        }
+      }
+    },
     "env": {
       "type": "object",
       "additionalProperties": { "type": "string" }

@@ -25,6 +25,9 @@ Get the service endpoint:
 Connect from within the cluster:
 
     {{ include "mcp-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/mcp
+{{- range .Values.extraPorts }}
+    {{ include "mcp-server.fullname" $ }}.{{ $.Release.Namespace }}.svc.cluster.local:{{ .servicePort | default .containerPort }}/mcp  ({{ .name }})
+{{- end }}
 
 Port-forward for local testing:
 
