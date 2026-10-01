@@ -76,7 +76,7 @@ service:
 # servicePort defaults to containerPort.
 extraPorts: []
 # extraPorts:
-#   - name: seismic
+#   - name: second
 #     containerPort: 8001
 #     servicePort: 8001
 

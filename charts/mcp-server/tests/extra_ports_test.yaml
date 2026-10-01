@@ -22,13 +22,13 @@ tests:
   - it: should add a named container port and a Service port for each extra port
     set:
       extraPorts:
-        - name: seismic
+        - name: second
           containerPort: 8001
     asserts:
       - contains:
           path: spec.template.spec.containers[0].ports
           content:
-            name: seismic
+            name: second
             containerPort: 8001
             protocol: TCP
         template: deployment.yaml
@@ -39,32 +39,32 @@ tests:
       - contains:
           path: spec.ports
           content:
-            name: seismic
+            name: second
             port: 8001
-            targetPort: seismic
+            targetPort: second
             protocol: TCP
         template: service.yaml
 
   - it: should let servicePort differ from containerPort
     set:
       extraPorts:
-        - name: seismic
+        - name: second
           containerPort: 8001
           servicePort: 9001
     asserts:
       - contains:
           path: spec.ports
           content:
-            name: seismic
+            name: second
             port: 9001
-            targetPort: seismic
+            targetPort: second
             protocol: TCP
         template: service.yaml
 
   - it: should keep the probes on the http port
     set:
       extraPorts:
-        - name: seismic
+        - name: second
           containerPort: 8001
     asserts:
       - equal:

@@ -46,7 +46,7 @@ A native server that serves more than one MCP endpoint from one process, one per
 
 ```yaml
 extraPorts:
-  - name: seismic
+  - name: second
     containerPort: 8001
 ```
 
